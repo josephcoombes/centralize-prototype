@@ -55,6 +55,14 @@ body {
   color: var(--foreground);
 }
 
+@layer components {
+  .dot-grid {
+    background-color: #fafafa;
+    background-image: radial-gradient(circle, #e5e7eb 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+}
+
 @keyframes accordion-down {
   from { height: 0; }
   to { height: var(--radix-accordion-content-height); }
