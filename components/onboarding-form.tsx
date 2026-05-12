@@ -315,15 +315,18 @@ function FlowController({ step }: { step: number }) {
   const { fitBounds } = useReactFlow();
   useEffect(() => {
     const boundsMap: Record<number, { x: number; y: number; width: number; height: number }> = {
-      0: { x: 0,   y: 0,   width: 256, height: 150 },   // user card
-      1: { x: 0,   y: 460, width: 256, height: 130 },  // company card
-      2: { x: 40,  y: 215, width: 180, height: 240 },   // orbit cluster
-      3: { x: 40,  y: 215, width: 180, height: 240 },   // orbit cluster (email/cal)
-      4: { x: -260, y: 620, width: 900, height: 420 },  // processing + personas
-      5: { x: -260, y: 440, width: 900, height: 420 },  // company + processing + personas
+      0: { x: 0,    y: 0,   width: 256, height: 150 },
+      1: { x: 0,    y: 460, width: 256, height: 130 },
+      2: { x: 40,   y: 215, width: 180, height: 240 },
+      3: { x: 40,   y: 215, width: 180, height: 240 },
+      4: { x: -248, y: 620, width: 752, height: 420 },
+      5: { x: -248, y: 440, width: 752, height: 420 },
     };
     const bounds = boundsMap[step];
-    if (bounds) fitBounds(bounds, { duration: 500, padding: 0.3 });
+    if (!bounds) return;
+    // Delay until after the 500ms column-width CSS transition settles
+    const t = setTimeout(() => fitBounds(bounds, { duration: 400, padding: 0.3 }), 520);
+    return () => clearTimeout(t);
   }, [step, fitBounds]);
   return null;
 }
