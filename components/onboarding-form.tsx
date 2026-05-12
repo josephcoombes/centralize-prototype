@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import {
   Puzzle,
@@ -16,10 +17,11 @@ import {
   ArrowRight,
   ArrowLeft,
   User,
-  Users,
   Sparkles,
   Globe,
   Building2,
+  Plus,
+  Trash2,
 } from "lucide-react";
 
 const STEPS = [
@@ -31,6 +33,14 @@ const STEPS = [
   { id: "suggestions", label: "Suggestions" },
 ];
 
+type Persona = {
+  id: string;
+  functionName: string;
+  responsibilities: string;
+  jobTitles: string;
+  keywords: string;
+};
+
 type FormData = {
   firstName: string;
   lastName: string;
@@ -40,17 +50,12 @@ type FormData = {
   extensionInstalled: boolean;
   emailConnected: boolean;
   calendarConnected: boolean;
-  personas: string[];
+  personas: Persona[];
 };
 
-const PERSONA_OPTIONS = [
-  { id: "founder", label: "Founder", icon: "🚀" },
-  { id: "investor", label: "Investor", icon: "💼" },
-  { id: "recruiter", label: "Recruiter", icon: "🎯" },
-  { id: "sales", label: "Sales", icon: "📈" },
-  { id: "advisor", label: "Advisor", icon: "🧠" },
-  { id: "operator", label: "Operator", icon: "⚙️" },
-];
+function makePersona(): Persona {
+  return { id: crypto.randomUUID(), functionName: "", responsibilities: "", jobTitles: "", keywords: "" };
+}
 
 export function OnboardingForm() {
   const [step, setStep] = useState(0);
@@ -63,7 +68,12 @@ export function OnboardingForm() {
     extensionInstalled: false,
     emailConnected: false,
     calendarConnected: false,
-    personas: [],
+    personas: [
+      { id: crypto.randomUUID(), functionName: "Design", responsibilities: "Define product vision, lead UX research, own design systems, ensure brand consistency across surfaces", jobTitles: "Head of Design, Product Designer, UX Lead, Creative Director", keywords: "Figma, design systems, usability, prototyping, accessibility" },
+      { id: crypto.randomUUID(), functionName: "Engineering", responsibilities: "Ship reliable software, manage technical debt, lead architecture decisions, grow engineering teams", jobTitles: "CTO, VP Engineering, Engineering Manager, Staff Engineer", keywords: "distributed systems, infra, TypeScript, platform, scalability" },
+      { id: crypto.randomUUID(), functionName: "Marketing", responsibilities: "Drive demand generation, own brand narrative, manage content and campaigns, grow pipeline", jobTitles: "CMO, VP Marketing, Growth Lead, Content Strategist", keywords: "GTM, demand gen, SEO, brand, campaigns, product marketing" },
+      { id: crypto.randomUUID(), functionName: "Security", responsibilities: "Own security posture, manage compliance programs, lead incident response, advise on risk", jobTitles: "CISO, Security Engineer, AppSec Lead, Compliance Manager", keywords: "SOC2, zero trust, pen testing, vulnerability management, IAM" },
+    ],
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,12 +90,18 @@ export function OnboardingForm() {
     update("profilePic", url);
   }
 
-  function togglePersona(id: string) {
+  function addPersona() {
+    setForm((prev) => ({ ...prev, personas: [...prev.personas, makePersona()] }));
+  }
+
+  function removePersona(id: string) {
+    setForm((prev) => ({ ...prev, personas: prev.personas.filter((p) => p.id !== id) }));
+  }
+
+  function updatePersona(id: string, field: keyof Omit<Persona, "id">, value: string) {
     setForm((prev) => ({
       ...prev,
-      personas: prev.personas.includes(id)
-        ? prev.personas.filter((p) => p !== id)
-        : [...prev.personas, id],
+      personas: prev.personas.map((p) => (p.id === id ? { ...p, [field]: value } : p)),
     }));
   }
 
@@ -93,7 +109,7 @@ export function OnboardingForm() {
     [form.firstName[0], form.lastName[0]].filter(Boolean).join("").toUpperCase() || "?";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Step indicator */}
         <div className="mb-8">
@@ -120,7 +136,7 @@ export function OnboardingForm() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-border p-8">
+        <div>
           {step === 0 && (
             <StepWelcome
               form={form}
@@ -133,7 +149,7 @@ export function OnboardingForm() {
           {step === 1 && <StepAccount form={form} onUpdate={update} />}
           {step === 2 && <StepSync form={form} onUpdate={update} />}
           {step === 3 && <StepConnect form={form} onUpdate={update} />}
-          {step === 4 && <StepPersonas form={form} onToggle={togglePersona} />}
+          {step === 4 && <StepPersonas form={form} onAdd={addPersona} onRemove={removePersona} onUpdate={updatePersona} />}
           {step === 5 && <StepSuggestions form={form} />}
 
           {/* Navigation */}
@@ -419,48 +435,91 @@ function ConnectCard({
 /* ── Step 5: Personas ── */
 function StepPersonas({
   form,
-  onToggle,
+  onAdd,
+  onRemove,
+  onUpdate,
 }: {
   form: FormData;
-  onToggle: (id: string) => void;
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, field: keyof Omit<Persona, "id">, value: string) => void;
 }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Choose your personas</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Personas</h2>
         <p className="text-muted-foreground mt-1">
-          Select all that apply. This helps us surface the right context for each interaction.
+          Define the roles you operate in. Each persona helps Centralize surface the right context.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {PERSONA_OPTIONS.map((p) => {
-          const selected = form.personas.includes(p.id);
-          return (
-            <button
-              key={p.id}
-              onClick={() => onToggle(p.id)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border p-4 text-left transition-all",
-                selected
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border bg-slate-50 hover:bg-white hover:border-slate-300"
-              )}
-            >
-              <span className="text-2xl">{p.icon}</span>
-              <div>
-                <p className="font-medium text-sm">{p.label}</p>
-                {selected && (
-                  <p className="text-xs text-primary">Selected</p>
+      <Accordion type="multiple" defaultValue={[form.personas[0]?.id]} className="border border-border rounded-lg divide-y divide-border">
+        {form.personas.map((p, i) => (
+          <AccordionItem key={p.id} value={p.id} className="border-0">
+            <AccordionTrigger className="px-4 hover:no-underline">
+              <span className="text-sm font-medium text-left">
+                {p.functionName || `Persona ${i + 1}`}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor={`fn-${p.id}`}>Function name</Label>
+                  <Input
+                    id={`fn-${p.id}`}
+                    placeholder="e.g. Sales, Recruiting, Investing"
+                    value={p.functionName}
+                    onChange={(e) => onUpdate(p.id, "functionName", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`resp-${p.id}`}>Key responsibilities</Label>
+                  <textarea
+                    id={`resp-${p.id}`}
+                    rows={2}
+                    placeholder="e.g. Close new business, manage pipeline, hit quota"
+                    value={p.responsibilities}
+                    onChange={(e) => onUpdate(p.id, "responsibilities", e.target.value)}
+                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`titles-${p.id}`}>Example job titles</Label>
+                  <Input
+                    id={`titles-${p.id}`}
+                    placeholder="e.g. AE, SDR, VP of Sales"
+                    value={p.jobTitles}
+                    onChange={(e) => onUpdate(p.id, "jobTitles", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`kw-${p.id}`}>Related keywords</Label>
+                  <Input
+                    id={`kw-${p.id}`}
+                    placeholder="e.g. SaaS, outbound, enterprise"
+                    value={p.keywords}
+                    onChange={(e) => onUpdate(p.id, "keywords", e.target.value)}
+                  />
+                </div>
+                {form.personas.length > 1 && (
+                  <button
+                    onClick={() => onRemove(p.id)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors mt-2"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove persona
+                  </button>
                 )}
               </div>
-              {selected && (
-                <Check className="h-4 w-4 text-primary ml-auto shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+
+      <Button variant="outline" size="sm" onClick={onAdd} className="gap-1.5 w-full">
+        <Plus className="h-4 w-4" />
+        Add another persona
+      </Button>
     </div>
   );
 }
@@ -515,24 +574,21 @@ function StepSuggestions({ form }: { form: FormData }) {
         ))}
       </div>
 
-      {form.personas.length > 0 && (
+      {form.personas.some((p) => p.functionName) && (
         <div className="rounded-xl border border-border bg-amber-50 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="h-4 w-4 text-amber-600" />
+            <Sparkles className="h-4 w-4 text-amber-600" />
             <p className="text-sm font-semibold text-amber-800">Your personas</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {form.personas.map((id) => {
-              const p = PERSONA_OPTIONS.find((o) => o.id === id);
-              return p ? (
-                <span
-                  key={id}
-                  className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800"
-                >
-                  {p.icon} {p.label}
-                </span>
-              ) : null;
-            })}
+            {form.personas.filter((p) => p.functionName).map((p) => (
+              <span
+                key={p.id}
+                className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800"
+              >
+                {p.functionName}
+              </span>
+            ))}
           </div>
         </div>
       )}
