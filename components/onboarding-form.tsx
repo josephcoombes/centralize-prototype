@@ -548,7 +548,7 @@ export function OnboardingForm() {
       <div className="w-full flex rounded-2xl overflow-hidden">
 
         {/* Left: form — scrollable */}
-        <div className={cn(step >= 4 ? "w-[50%]" : "w-[30%]", "py-16 px-16 transition-all duration-500 overflow-y-auto shrink-0")}>
+        <div className={cn(step >= 4 ? "w-[50%]" : "w-[30%]", "py-8 pr-8 transition-all duration-500 overflow-y-auto shrink-0")}>
           <div className="mb-12">
             <Image src="/logo.svg" alt="Centralize" width={129} height={28} priority />
           </div>
@@ -621,8 +621,8 @@ function StepWelcome({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[1.5rem] font-medium">Welcome aboard</h1>
-        <p className="text-[1.5rem] font-light text-muted-foreground">Let&apos;s start with the basics.</p>
+        <h1 className="text-[1.25rem] font-medium">Welcome aboard</h1>
+        <p className="text-[1rem] font-light text-muted-foreground">Let&apos;s start with the basics.</p>
       </div>
 
       <div className="space-y-4">
@@ -719,8 +719,8 @@ function StepAccount({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[1.5rem] font-medium">Alright, {form.firstName || "there"} let&apos;s add your first account</h2>
-        <p className="text-[1.5rem] font-light text-muted-foreground">What company are you trying to sell into</p>
+        <h2 className="text-[1.25rem] font-medium">Alright{form.firstName ? `, ${form.firstName}` : ""}, let&apos;s add your first account</h2>
+        <p className="text-[1rem] font-light text-muted-foreground">What company are you trying to sell into</p>
       </div>
 
       <div className="space-y-4">
@@ -771,8 +771,8 @@ function StepSync({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[1.5rem] font-medium">Sync your network</h2>
-        <p className="text-[1.5rem] font-light text-muted-foreground">
+        <h2 className="text-[1.25rem] font-medium">Sync your network</h2>
+        <p className="text-[1rem] font-light text-muted-foreground">
           Install the Chrome extension to automatically import your LinkedIn connections and web activity.
         </p>
       </div>
@@ -822,8 +822,8 @@ function StepConnect({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[1.5rem] font-medium">Connect your accounts</h2>
-        <p className="text-[1.5rem] font-light text-muted-foreground">
+        <h2 className="text-[1.25rem] font-medium">Connect your accounts</h2>
+        <p className="text-[1rem] font-light text-muted-foreground">
           Pull in your emails and calendar events to enrich your network.
         </p>
       </div>
@@ -901,8 +901,8 @@ function StepPersonas({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[1.5rem] font-medium">Personas</h2>
-        <p className="text-[1.5rem] font-light text-muted-foreground">
+        <h2 className="text-[1.25rem] font-medium">Personas</h2>
+        <p className="text-[1rem] font-light text-muted-foreground">
           Define the roles you operate in. Each persona helps Centralize surface the right context.
         </p>
       </div>
@@ -996,8 +996,8 @@ function StepSuggestions({ form, onAddContact }: { form: FormData; onAddContact:
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[1.5rem] font-medium">Here&apos;s who we found, {firstName}</h2>
-        <p className="text-[1.5rem] font-light text-muted-foreground">
+        <h2 className="text-[1.25rem] font-medium">Here&apos;s who we found, {firstName}</h2>
+        <p className="text-[1rem] font-light text-muted-foreground">
           Key people at {accountName}. Add them to your map.
         </p>
       </div>
